@@ -1,0 +1,4 @@
+.nrepl-port
+logs/
+target/
+.lein-failures
