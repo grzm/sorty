@@ -3,3 +3,6 @@ logs/
 target/
 .lein-failures
 _notes/
+*.log
+resources/public/js/
+.cljs_rhino_repl
