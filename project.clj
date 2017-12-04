@@ -33,7 +33,7 @@
                    :aliases      {"run-dev" ["trampoline" "run" "-m" "com.grzm.sorty.server/run-dev"]
                                   "fw"      ["run" "-m" "clojure.main" "script/figwheel.clj"]}
                    :dependencies [[binaryage/devtools "0.9.4"]
-                                  [com.cemerick/piggieback "0.2.1"]
+                                  [com.cemerick/piggieback "0.2.2"]
                                   [figwheel-sidecar "0.5.14"]
                                   [org.clojure/tools.namespace "0.3.0-alpha4"]
                                   [org.clojure/tools.nrepl "0.2.13"]
