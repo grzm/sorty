@@ -38,7 +38,7 @@
                                   [org.clojure/tools.namespace "0.3.0-alpha4"]
                                   [org.clojure/tools.nrepl "0.2.13"]
                                   [peridot "0.5.0"]]
-                   :main user}
+                   :main         user}
 
              :test    {:jvm-opts       ["-Dlogback.configurationFile=test/config/logback.xml"]
                        :source-paths   ["test/server"]
@@ -49,11 +49,11 @@
                                         :public-http-scheme "https"}}
              :server  {:main com.grzm.sorty.server}
              :uberjar {:aot [com.grzm.sorty.server]}}
-  :cljfmt {:indents {merge      [[:inner 0]]
+  :cljfmt {:indents {merge       [[:inner 0]]
                      ;; component
-                     system-map [[:inner 0]]
+                     system-map  [[:inner 0]]
                      ;; om
-                     render [[:inner 0]]
+                     render      [[:inner 0]]
                      ;; figwheel
                      css-watcher [[:inner 0]]}}
   :cljsbuild {:builds
