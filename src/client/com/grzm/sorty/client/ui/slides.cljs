@@ -7,6 +7,8 @@
   static prim/InitialAppState
   (initial-state [comp-class {:keys [text id s-class] :as params}]
     {:text text :id id :s-class s-class})
+  static prim/IQuery
+  (query [this] [:text :id :s-class])
   Object
   (render [this]
     (let [{:keys [text id s-class]} (prim/props this)
@@ -41,6 +43,8 @@
   static prim/InitialAppState
   (initial-state [comp-class {:keys [text id s-class] :as params}]
     {:text text :id id :s-class s-class})
+  static prim/IQuery
+  (query [this] [:text :id :s-class])
   Object
   (render [this]
     (let [{:keys [text id s-class]} (prim/props this)
