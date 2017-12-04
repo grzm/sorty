@@ -33,7 +33,11 @@ To start figwheel from Cider, open `src/dev/user.clj` in a buffer and
 run `cider-jack-in-clojurescript`. This will start one JVM repl and one cljs repl.
 From the JVM repl, run `(user/start-figwheel)`.
 
+### Devcards
 
+Devcards also runs via figwheel. Start figwheel, and be sure to switch
+the build to `:devcards`, and open the brower to
+[http://localhost:3449/devcards.html](http://localhost:3449/devcards.html).
 
 ### Server
 Starting server in dev

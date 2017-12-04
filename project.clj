@@ -34,10 +34,12 @@
                                   "fw"      ["run" "-m" "clojure.main" "script/figwheel.clj"]}
                    :dependencies [[binaryage/devtools "0.9.4"]
                                   [com.cemerick/piggieback "0.2.2"]
+                                  [devcards "0.2.4" :exclusions [cljsjs/react-dom cljsjs/react]]
                                   [figwheel-sidecar "0.5.14"]
                                   [org.clojure/tools.namespace "0.3.0-alpha4"]
                                   [org.clojure/tools.nrepl "0.2.13"]
-                                  [peridot "0.5.0"]]
+                                  [peridot "0.5.0"]
+                                  [sablono "0.8.1"]]
                    :main         user}
 
              :test    {:jvm-opts       ["-Dlogback.configurationFile=test/config/logback.xml"]
@@ -65,4 +67,14 @@
                                :output-dir    "resources/public/js/app"
                                :preloads      [devtools.preload]
                                :asset-path    "js/app"
-                               :optimizations :none}}]})
+                               :optimizations :none}}
+               {:id           "devcards"
+                :source-paths ["src/client" "src/devcards"]
+                :figwheel     {:devcards true}
+                :compiler     {:main                 com.grzm.sorty.devcards
+                               :output-to            "resources/public/js/devcards.js"
+                               :output-dir           "resources/public/js/devcards"
+                               :asset-path           "js/devcards"
+                               :preloads             [devtools.preload]
+                               :source-map-timestamp true
+                               :optimizations        :none}}]})
