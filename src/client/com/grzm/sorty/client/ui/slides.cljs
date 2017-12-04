@@ -1,12 +1,15 @@
 (ns com.grzm.sorty.client.ui.slides
   (:require
-   [om.dom :as dom]
-   [om.next :as om :refer-macros [defui]]))
+   [fulcro.client.dom :as dom]
+   [fulcro.client.primitives :as prim :refer-macros [defui]]))
 
-(defui Slide
+(defui ^:once Slide
+  static prim/InitialAppState
+  (initial-state [comp-class {:keys [text id s-class] :as params}]
+    {:text text :id id :s-class s-class})
   Object
   (render [this]
-    (let [{:keys [text id s-class]} (om/props this)
+    (let [{:keys [text id s-class]} (prim/props this)
           default-label-attrs       {:className "form-check-label"}
           default-input-attrs       {:className "btn"
                                      :name      "s-class"
@@ -25,20 +28,25 @@
           (dom/fieldset
             nil
             (dom/legend nil "Is this " (dom/strong nil s-class) "?")
-            (dom/div
-              #js {:className "form-check"}
-              (radio-button {:accessKey ","} {:value "yes"} "yes")
-              (radio-button {:accessKey "."} {:value "no"} "no")
-              (radio-button {:accessKey "s"} {:value "skip"} "skip")
-              (dom/button
-                #js {:className "btn btn-primary" :type "submit" :value "Submit"} "Submit"))))))))
+            (dom/div #js {:className "form-check"}
+                     (radio-button {:accessKey ","} {:value "yes"} "yes")
+                     (radio-button {:accessKey "."} {:value "no"} "no")
+                     (radio-button {:accessKey "s"} {:value "skip"} "skippy!")
+                     (dom/button #js {:className "btn btn-primary" :type "submit" :value "Submit"}
+                                 "Submit"))))))))
 
-(def ui-slide (om/factory Slide {:keyfn :id}))
+(def ui-slide (prim/factory Slide))
 
-(defui SlideWithButtons
+(defui ^:once SlideWithButtons
+  static prim/InitialAppState
+  (initial-state [comp-class {:keys [text id s-class] :as params}]
+    {:text text :id id :s-class s-class})
   Object
   (render [this]
-    (let [{:keys [text id s-class]} (om/props this)]
+    (let [{:keys [text id s-class]} (prim/props this)
+          default-attrs             {:className "btn btn-primary" :type "button"}
+          classify-button           (fn [attrs text]
+                                      (dom/button (clj->js (merge default-attrs attrs)) text))]
       (dom/div
         #js {:id id}
         (dom/p nil text)
@@ -47,10 +55,9 @@
           (dom/fieldset
             nil
             (dom/legend nil "Is this " (dom/strong nil s-class) "?")
-            (dom/div
-              #js {:className "form-check"}
-              (dom/button #js {:className "btn btn-primary" :type "button" :value "yes"} "yes")
-              (dom/button #js {:className "btn btn-primary" :type "button" :value "no"} "no")
-              (dom/button #js {:className "btn btn-primary" :type "button" :value "skip"} "skip"))))))))
+            (dom/div #js {:className "form-check"}
+                     (classify-button {:value "yes"} "yes")
+                     (classify-button {:value "no"} "no")
+                     (classify-button {:value "skip"} "skip"))))))))
 
-(def ui-slide-with-buttons (om/factory SlideWithButtons {:keyfn :id}))
+(def ui-slide-with-buttons (prim/factory SlideWithButtons))

@@ -1,8 +1,8 @@
-(ns com.grzm.sorty.client.basic-ui
+(ns com.grzm.sorty.client.app
   (:require
-   [fulcro.client.core :as fc]
-   [om.dom :as dom]
-   [om.next :as om :refer [defui]]))
+   [fulcro.client :as fc]
+   [fulcro.client.dom :as dom]
+   [fulcro.client.primitives :as om :refer [defui]]))
 
 (defonce app (atom (fc/new-fulcro-client)))
 
@@ -11,3 +11,6 @@
   (render [this]
     (let [{:keys [ui/react-key]} (om/props this)]
       (dom/div #js {:key react-key} "Hello World!"))))
+
+(defn mount! []
+  (reset! app (fc/mount @app ui/Root "app")))

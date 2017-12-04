@@ -1,11 +1,10 @@
 (ns cljs.user
   (:require
-   [com.grzm.sorty.client.basic-ui :refer [app Root]]
-   [fulcro.client.core :as fc]))
+   [com.grzm.sorty.client.app :as app]))
 
 (defn refresh
   []
-  (swap! app fc/mount Root "app"))
+  (swap! app/app (app/mount!)))
 
 ;; for initial mount
 (refresh)
