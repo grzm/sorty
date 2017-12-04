@@ -25,7 +25,6 @@
   :clean-targets ^{:protect false} ["resources/public/js" "target" "out"]
   ;; See: https://www.eclipse.org/jetty/documentation/current/alpn-chapter.html#alpn-versions
   :java-agents [[org.mortbay.jetty.alpn/jetty-alpn-agent "2.0.5"]]
-  ;;  :java-agents [[org.mortbay.jetty.alpn/alpn-boot "8.1.3.v20150130"]] ;; JDK 1.8.0_31/40/45
   :main ^{:skip-aot true} com.grzm.sorty.server
   :plugins [[lein-cljfmt "0.5.7"]
             [lein-cljsbuild "1.1.7"]]
