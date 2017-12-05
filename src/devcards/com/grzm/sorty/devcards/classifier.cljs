@@ -15,7 +15,6 @@
   Object
   (render [this]
     (let [{:keys [ui/react-key item]} (prim/props this)]
-      (log/warn (pr-str (prim/props this)))
       (dom/div
         #js {:key react-key}
         (classifier/ui-classifiable-text-item item)))))
@@ -26,9 +25,6 @@
           :text-item {:id 1 :text "Here's some text"}}}
   {:inspect-data true})
 
-
-
-
 (defui ^:once ClassifiableTextItemListRoot
   static prim/IQuery
   (query [this] [:ui/react-key
@@ -36,7 +32,6 @@
   Object
   (render [this]
     (let [{:keys [ui/react-key item-list]} (prim/props this)]
-      (log/warn (pr-str (prim/props this)))
       (dom/div
         #js {:key react-key}
         (classifier/ui-classifiable-text-item-list item-list)))))
