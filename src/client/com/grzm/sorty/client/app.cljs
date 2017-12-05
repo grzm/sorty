@@ -13,4 +13,4 @@
       (dom/div #js {:key react-key} "Hello World!"))))
 
 (defn mount! []
-  (reset! app (fc/mount @app ui/Root "app")))
+  (reset! app (fc/mount @app Root "app")))
