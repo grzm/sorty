@@ -4,7 +4,7 @@
 
 (defn refresh
   []
-  (swap! app/app (app/mount!)))
+  (swap! app/app app/mount))
 
 ;; for initial mount
 (refresh)
