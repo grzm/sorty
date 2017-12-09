@@ -55,10 +55,14 @@
   "Classify item"
   [{:keys [item s-class value]}]
   (action [{:keys [state]}]
-          (let [path     [:item-list :items]
-                old-list (get-in @state path)
-                new-list (vec (filter #(not= (:text-item %) item) old-list))]
-            (swap! state assoc-in path new-list))))
+          (let [unclassified-path    [:unclassified :item-list/items]
+                unclassified (get-in @state unclassified-path)
+                unclassified' (vec (filter #(not= (:text-item %) item) unclassified))
+                new-state (swap! state assoc-in unclassified-path unclassified')]
+            (log/warn (pr-str {:classify-item item :value value
+                               :unclassified unclassified, :unclassified' unclassified'
+                               :new-state new-state}))
+            new-state)))
 
 (defn make-classify-fn [c]
   (fn [item s-class value]
@@ -67,10 +71,10 @@
 
 (defui ^:once ClassifiableTextItemList
   static prim/IQuery
-  (query [this] [{:items (prim/get-query ClassifiableTextItem)}])
+  (query [this] [:item-list/id {:item-list/items (prim/get-query ClassifiableTextItem)}])
   Object
   (render [this]
-    (let [{:keys [items]} (prim/props this)
+    (let [{:keys [item-list/items]} (prim/props this)
           classify-fn     (make-classify-fn this)]
       (dom/div
         nil (dom/ol

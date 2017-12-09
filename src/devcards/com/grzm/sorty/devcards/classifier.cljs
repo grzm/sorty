@@ -28,20 +28,23 @@
 (defui ^:once ClassifiableTextItemListRoot
   static prim/IQuery
   (query [this] [:ui/react-key
-                 {:item-list (prim/get-query classifier/ClassifiableTextItemList)}])
+                 {:unclassified (prim/get-query classifier/ClassifiableTextItemList)}])
   Object
   (render [this]
-    (let [{:keys [ui/react-key item-list]} (prim/props this)]
+    (let [{:keys [ui/react-key unclassified]} (prim/props this)]
       (dom/div
         #js {:key react-key}
-        (classifier/ui-classifiable-text-item-list item-list)))))
+        (classifier/ui-classifiable-text-item-list unclassified)))))
 
 (defcard-fulcro classification-text-item-list
   ClassifiableTextItemListRoot
-  {:item-list {:items [{:s-class   {:id 4 :name "spam"}
-                        :text-item {:id 1 :text "Here's some text"}}
-                       {:s-class   {:id 4 :name "spam"}
-                        :text-item {:id 2 :text "Here's some other text"}}
-                       {:s-class   {:id 4 :name "spam"}
-                        :text-item {:id 3 :text "Hey, this is text, too"}}]}}
+  {:unclassified {:item-list/id :unclassified
+                  :item-list/items [{:s-class   {:id 4 :name "spam"}
+                           :text-item {:id 1 :text "Here's some text"}}
+                          {:s-class   {:id 4 :name "spam"}
+                           :text-item {:id 2 :text "Here's some other text"}}
+                          {:s-class   {:id 4 :name "spam"}
+                           :text-item {:id 3 :text "Hey, this is text, too"}}]}
+   :classified {:item-list/id :classified
+                :item-list/items []}}
   {:inspect-data true})
