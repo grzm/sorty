@@ -6,6 +6,11 @@
    [fulcro.client.primitives :as prim :refer-macros [defui]]))
 
 (defui ^:once TextItem
+  static prim/InitialAppState
+  (initial-state
+    [c {:keys [id text] :as params}]
+    {:id id :text text})
+
   static prim/IQuery
   (query [this] [:id :text])
 
@@ -17,6 +22,12 @@
 (def ui-text-item (prim/factory TextItem))
 
 (defui ^:once ClassifiableTextItem
+  static prim/InitialAppState
+  (initial-state
+    [c {:keys [s-class text-item] :as params}]
+    {:s-class s-class
+     :text-item text-item})
+
   static prim/IQuery
   (query [this] [:s-class {:text-item (prim/get-query TextItem)}])
 
@@ -71,6 +82,12 @@
                           {:item ~item :s-class ~s-class :value ~value})])))
 
 (defui ^:once ClassifiableTextItemList
+  static prim/InitialAppState
+  (initial-state
+    [c {:keys [item-list/id item-list/items]}]
+     {:item-list/id id
+      :item-list/items items})
+
   static prim/IQuery
   (query [this] [:item-list/id {:item-list/items (prim/get-query ClassifiableTextItem)}])
 
