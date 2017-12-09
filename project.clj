@@ -63,7 +63,8 @@
                                :source-map-timestamp true}}
                {:id           "devcards"
                 :source-paths ["src/client" "src/dev" "src/devcards"]
-                :figwheel     {:devcards true}
+                :figwheel     {:devcards true
+                               :on-jsload "cljs.user/no-op"}
                 :compiler     {:main                 com.grzm.sorty.devcards
                                :output-to            "resources/public/js/devcards.js"
                                :output-dir           "resources/public/js/devcards"

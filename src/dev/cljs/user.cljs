@@ -18,3 +18,7 @@
   ([app]
    @(prim/app-state
       (:reconciler @app))))
+
+(defn no-op
+  "something just to ensure this gets loaded in devcard build"
+  [])
