@@ -27,18 +27,18 @@
   :main ^{:skip-aot true} com.grzm.sorty.server
   :plugins [[lein-cljfmt "0.5.7"]
             [lein-cljsbuild "1.1.7"]]
-  :profiles {:dev {:source-paths ["src/client" "src/dev" "src/server"]
-                   :aliases      {"run-dev" ["trampoline" "run" "-m" "com.grzm.sorty.server/run-dev"]
-                                  "fw"      ["run" "-m" "clojure.main" "script/figwheel.clj"]}
-                   :dependencies [[binaryage/devtools "0.9.4"]
-                                  [com.cemerick/piggieback "0.2.2"]
-                                  [devcards "0.2.4" :exclusions [cljsjs/react-dom cljsjs/react]]
-                                  [figwheel-sidecar "0.5.14"]
-                                  [org.clojure/tools.namespace "0.3.0-alpha4"]
-                                  [org.clojure/tools.nrepl "0.2.13"]
-                                  [peridot "0.5.0"]
-                                  [sablono "0.8.1"]]
-                   :main         user}
+  :profiles {:dev     {:source-paths ["src/client" "src/dev" "src/server"]
+                       :aliases      {"run-dev" ["trampoline" "run" "-m" "com.grzm.sorty.server/run-dev"]
+                                      "fw"      ["run" "-m" "clojure.main" "script/figwheel.clj"]}
+                       :dependencies [[binaryage/devtools "0.9.4"]
+                                      [com.cemerick/piggieback "0.2.2"]
+                                      [devcards "0.2.4" :exclusions [cljsjs/react-dom cljsjs/react]]
+                                      [figwheel-sidecar "0.5.14"]
+                                      [org.clojure/tools.namespace "0.3.0-alpha4"]
+                                      [org.clojure/tools.nrepl "0.2.13"]
+                                      [peridot "0.5.0"]
+                                      [sablono "0.8.1"]]
+                       :main         user}
 
              :test    {:jvm-opts       ["-Dlogback.configurationFile=test/config/logback.xml"]
                        :source-paths   ["test/server"]
@@ -49,30 +49,32 @@
                                         :public-http-scheme "https"}}
              :server  {:main com.grzm.sorty.server}
              :uberjar {:aot [com.grzm.sorty.server]}}
-  :cljfmt {:indents {merge       [[:inner 0]]
-                     ;; component
-                     system-map  [[:inner 0]]
-                     ;; om
-                     render      [[:inner 0]]
-                     ;; figwheel
-                     css-watcher [[:inner 0]]}}
+
   :cljsbuild {:builds
               [{:id           "dev"
                 :source-paths ["src/client"]
                 :figwheel     {:on-jsload "cljs.user/refresh"}
-                :compiler     {:main          cljs.user
-                               :output-to     "resources/public/js/app.js"
-                               :output-dir    "resources/public/js/app"
-                               :preloads      [devtools.preload]
-                               :asset-path    "js/app"
-                               :optimizations :none}}
+                :compiler     {:main                 cljs.user
+                               :output-to            "resources/public/js/app.js"
+                               :output-dir           "resources/public/js/app"
+                               :asset-path           "js/app"
+                               :preloads             [devtools.preload]
+                               :optimizations        :none
+                               :source-map-timestamp true}}
                {:id           "devcards"
-                :source-paths ["src/client" "src/devcards"]
+                :source-paths ["src/client" "src/dev" "src/devcards"]
                 :figwheel     {:devcards true}
                 :compiler     {:main                 com.grzm.sorty.devcards
                                :output-to            "resources/public/js/devcards.js"
                                :output-dir           "resources/public/js/devcards"
                                :asset-path           "js/devcards"
                                :preloads             [devtools.preload]
-                               :source-map-timestamp true
-                               :optimizations        :none}}]})
+                               :optimizations        :none
+                               :source-map-timestamp true}}]}
+  :cljfmt {:indents {merge       [[:inner 0]]
+                     ;; component
+                     system-map  [[:inner 0]]
+                     ;; om
+                     render      [[:inner 0]]
+                     ;; figwheel
+                     css-watcher [[:inner 0]]}})
