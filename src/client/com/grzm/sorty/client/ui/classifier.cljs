@@ -8,6 +8,7 @@
 (defui ^:once TextItem
   static prim/IQuery
   (query [this] [:id :text])
+
   Object
   (render [this]
     (let [{:keys [id text]} (prim/props this)]
@@ -72,6 +73,7 @@
 (defui ^:once ClassifiableTextItemList
   static prim/IQuery
   (query [this] [:item-list/id {:item-list/items (prim/get-query ClassifiableTextItem)}])
+
   Object
   (render [this]
     (let [{:keys [item-list/items]} (prim/props this)
