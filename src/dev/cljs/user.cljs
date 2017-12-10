@@ -10,15 +10,29 @@
 ;; for initial mount
 (refresh)
 
-(defn app-state-value
+(defn app-state
   "Return current app state value for the given app atom,
   or the main application app atom if no app atom is given."
   ([]
-   (app-state-value app/app))
+   (app-state app/app))
   ([app]
    @(prim/app-state
       (:reconciler @app))))
 
+(defn q
+  "Shortcut for fulcro.client.primitives/db->tree.
+
+  If data is an atom wrapping a fulcro.client.Application,
+  use the current app state"
+  ([query data]
+    (q query data {}))
+  ([query data refs]
+   (let [data' (if (and (instance? Atom data)
+                        (instance? fulcro.client.Application @data))
+                 (app-state data) data)]
+     (prim/db->tree query data' refs))))
+
 (defn no-op
-  "something just to ensure this gets loaded in devcard build"
+  "Something just to ensure this gets loaded in devcard build.
+  Called by figwheel on-jsload"
   [])
