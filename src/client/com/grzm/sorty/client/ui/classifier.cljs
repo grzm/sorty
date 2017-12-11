@@ -24,7 +24,6 @@
   (render [this]
           (let [{:keys [s-class text-item]}
                 (prim/props this)
-
                 classify-fn (prim/get-computed this :classify-fn)
                 default-attrs {:className "btn btn-primary" :type "button"}
                 classify-button (fn [attrs text]
