@@ -6,3 +6,5 @@ _notes/
 *.log
 resources/public/js/
 .cljs_rhino_repl
+.idea
+sorty.alpha.iml
