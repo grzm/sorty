@@ -47,10 +47,6 @@
 (def ui-classifiable-text-item
   (prim/factory ClassifiableTextItem {:keyfn #(str "cti-" (get-in % [:text-item :id]))}))
 
-;; This relies on knowing the data model *from the root*,
-;; which means this component needs to know where it is in composition
-;; Yuck.
-
 (defmutation classify-item
   "Classify item"
   [{:keys [list-id item-id class-id value]}]
