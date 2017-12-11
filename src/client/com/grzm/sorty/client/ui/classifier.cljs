@@ -75,16 +75,7 @@
   (initial-state
     [c {:keys [item-list/id item-list/items]}]
     {:item-list/id    id
-     :item-list/items (if (= :unclassified id)
-                        [(prim/get-initial-state ClassifiableTextItem
-                                                 {:s-class   {:id 4 :name "spam"}
-                                                  :text-item {:id 1 :text "Here's some text"}})
-                         (prim/get-initial-state ClassifiableTextItem
-                                                 {:s-class   {:id 4 :name "spam"}
-                                                  :text-item {:id 2 :text "Here's some other text"}})
-                         (prim/get-initial-state ClassifiableTextItem
-                                                 {:s-class   {:id 4 :name "spam"}
-                                                  :text-item {:id 3 :text "Hey, this is text, too"}})])})
+     :item-list/items []})
 
   Object
   (render [this]

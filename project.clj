@@ -10,7 +10,7 @@
                   :exclusions [ch.qos.logback/logback-classic]]
                  [com.stuartsierra/component "0.3.2"]
                  [grzm/component.pedestal "0.0.1-SNAPSHOT"]
-                 [fulcrologic/fulcro "2.0.0-beta2"]
+                 [fulcrologic/fulcro "2.0.0-beta6-SNAPSHOT"]
                  [io.pedestal/pedestal.jetty "0.5.3"]
                  [io.pedestal/pedestal.service "0.5.3"]
                  [org.clojure/clojure "1.9.0-RC2"]
