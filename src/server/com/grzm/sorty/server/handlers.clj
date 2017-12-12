@@ -1,6 +1,6 @@
 (ns com.grzm.sorty.server.handlers
   (:require
-   [grzm.component.pedestal :as pedestal]))
+   [com.grzm.component.pedestal :as pedestal]))
 
 (defn hallo
   [request]

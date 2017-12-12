@@ -2,7 +2,7 @@
   (:require
    [clojure.test :as test :refer [are deftest is]]
    [com.grzm.sorty.server.test.fixture :as fix :refer [system system-init-fn]]
-   [grzm.component.pedestal.test :refer [with-system ring-handler]]
+   [com.grzm.component.pedestal.test :refer [with-system ring-handler]]
    [peridot.core :as p]))
 
 (deftest hallo

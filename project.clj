@@ -8,8 +8,8 @@
                   :exclusions [org.slf4j/slf4j-api]]
                  [com.grzm/logback-discriminator "0.1.1-SNAPSHOT"
                   :exclusions [ch.qos.logback/logback-classic]]
+                 [com.grzm/component.pedestal "0.0.2-SNAPSHOT"]
                  [com.stuartsierra/component "0.3.2"]
-                 [grzm/component.pedestal "0.0.1-SNAPSHOT"]
                  [fulcrologic/fulcro "2.0.0-beta6-SNAPSHOT"]
                  [io.pedestal/pedestal.jetty "0.5.3"]
                  [io.pedestal/pedestal.service "0.5.3"]

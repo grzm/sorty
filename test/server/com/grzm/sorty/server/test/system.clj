@@ -1,8 +1,8 @@
 (ns com.grzm.sorty.server.test.system
   (:require
+   [com.grzm.component.pedestal :as pedestal]
    [com.grzm.sorty.server.config :as config]
-   [com.stuartsierra.component :as component]
-   [grzm.component.pedestal :as pedestal]))
+   [com.stuartsierra.component :as component]))
 
 (def http-port 8765)
 
