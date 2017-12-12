@@ -2,6 +2,7 @@
   (:require
    [com.grzm.component.pedestal :as pedestal]
    [com.grzm.sorty.server.handlers :as handlers]
+   [com.grzm.sorty.server.api :as api]
    [io.pedestal.http :as http]
    [io.pedestal.http.body-params :as body-params]))
 
@@ -12,5 +13,9 @@
   [h]
   (conj common-interceptors h))
 
+(def api-interceptors `api/api)
+
 (def routes
-  #{["/hallo" :get `handlers/hallo :route-name :hallo]})
+  #{["/hallo" :get `handlers/hallo :route-name :hallo]
+    ["/api" :get api-interceptors :route-name :api-get]
+    ["/api" :post api-interceptors :route-name :api-post]})

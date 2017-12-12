@@ -11,3 +11,17 @@
         (p/request "/hallo")
         (doto ((fn [{:keys [response]}]
                  (is (= 200 (:status response)))))))))
+
+(deftest api-get
+  (with-system #'system system-init-fn
+    (-> (p/session (ring-handler system))
+        (p/request "/api")
+        (doto ((fn [{:keys [response]}]
+                 (is (= 200 (:status response)))))))))
+
+(deftest api-post
+  (with-system #'system system-init-fn
+    (-> (p/session (ring-handler system))
+        (p/request "/api" :request-method :post)
+        (doto ((fn [{:keys [response]}]
+                 (is (= 200 (:status response)))))))))
