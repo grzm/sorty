@@ -9,6 +9,7 @@
                  [com.grzm/logback-discriminator "0.1.1-SNAPSHOT"
                   :exclusions [ch.qos.logback/logback-classic]]
                  [com.grzm/component.pedestal "0.0.2-SNAPSHOT"]
+                 [com.cognitect/transit-clj "0.8.300"]
                  [com.stuartsierra/component "0.3.2"]
                  [fulcrologic/fulcro "2.0.0-beta6-SNAPSHOT"]
                  [io.pedestal/pedestal.jetty "0.5.3"]
@@ -37,8 +38,12 @@
                                       [org.clojure/tools.namespace "0.3.0-alpha4"]
                                       [org.clojure/tools.nrepl "0.2.13"]
                                       [peridot "0.5.0"]
+                                      [pjstadig/humane-test-output "0.8.3"]
                                       [sablono "0.8.1"]]
-                       :main         user}
+                       :main         user
+                       :plugins [[com.jakemccrary/lein-test-refresh "0.22.0"]]
+                       :injections [(require 'pjstadig.humane-test-output)
+                                    (pjstadig.humane-test-output/activate!)]}
 
              :test    {:jvm-opts       ["-Dlogback.configurationFile=test/config/logback.xml"]
                        :source-paths   ["test/server"]

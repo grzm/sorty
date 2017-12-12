@@ -13,7 +13,10 @@
   [h]
   (conj common-interceptors h))
 
-(def api-interceptors `api/api)
+(def api-interceptors
+  [(pedestal/using-component :app)
+   (pedestal/using-component :api)
+   `handlers/api])
 
 (def routes
   #{["/hallo" :get `handlers/hallo :route-name :hallo]
