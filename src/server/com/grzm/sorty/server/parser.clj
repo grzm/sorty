@@ -1,8 +1,8 @@
 (ns com.grzm.sorty.server.parser
   (:refer-clojure :exclude [read])
   (:require
-   [fulcro.server :as fs]
-   [io.pedestal.log :as log]))
+    [fulcro.server :as fs]
+    [io.pedestal.log :as log]))
 
 (defmulti read fs/dispatch)
 (defmethod read :default

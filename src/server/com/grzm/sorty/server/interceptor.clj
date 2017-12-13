@@ -15,7 +15,7 @@
   (body-params/body-params
     (body-params/default-parser-map
       :transit-options [{:handlers {"fulcro/tempid" (reify ReadHandler
-                                     (fromRep [_ id] (TempId. id)))}}])))
+                                                      (fromRep [_ id] (TempId. id)))}}])))
 
 (def transit-encodings #{:json :json-verbose :msgpack})
 
