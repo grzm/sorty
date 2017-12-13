@@ -2,7 +2,7 @@
   (:require
    [com.grzm.component.pedestal :as pedestal]
    [com.grzm.sorty.server.handlers :as handlers]
-   [com.grzm.sorty.server.api :as api]
+   [com.grzm.sorty.server.interceptor :as si]
    [io.pedestal.http :as http]
    [io.pedestal.http.body-params :as body-params]))
 
@@ -14,7 +14,10 @@
   (conj common-interceptors h))
 
 (def api-interceptors
-  [(pedestal/using-component :app)
+  [pedestal/strip-component
+   si/fulcro-body-params
+   (si/fulcro-response)
+   (pedestal/using-component :app)
    (pedestal/using-component :api)
    `handlers/api])
 

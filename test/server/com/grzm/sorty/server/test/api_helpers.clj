@@ -3,11 +3,11 @@
     [clojure.test :refer [is]]
     [cognitect.transit :as ct]
     [fulcro.server :as fs]
-    [fulcro.transit :as transit]
     [io.pedestal.log :as log]
-    [peridot.core :as p])
+    [peridot.core :as p]
+    [com.grzm.sorty.server.fulcro-util :as fu])
   (:import
-    (java.io ByteArrayOutputStream ByteArrayInputStream)))
+    (java.io ByteArrayInputStream)))
 
 (def api-endpoint "/api")
 (def csrf-token-header-key "X-TEST-HELPER-CSRF")
@@ -17,32 +17,9 @@
 
 ;; transit helpers
 
-(defn edn->body
-  "Translates an EDN structure to a body String.
+(defn edn->body [edn] (fu/write-transit edn))
 
-  This is effectively a copy of fulcro.server/write, which is marked private"
-  [edn]
-  (let [baos (ByteArrayOutputStream.)
-        w (fs/writer baos)
-        _ (ct/write w edn)
-        body (.toString baos)]
-    ;; why is this necessary? It's going out of scope, so will be garbage-collected.
-    (.reset baos)
-    body))
-
-(defn body->edn
-  "Translates a body String to an EDN structure.
-
-  This is very similar to fulcro.server/read-transit, which is marked private."
-  [body]
-  (let [in (ByteArrayInputStream. (.getBytes body))
-        reader (fs/reader in)]
-    (try
-      (ct/read reader)
-      (catch Exception e
-        (log/error :msg (str e)
-                   :body (str body)
-                   :stack-trace (with-out-str (.printStackTrace e)))))))
+(def body->edn fu/read-transit)
 
 (defn response-csrf-token
   "Extracts CSRF token from server response"
@@ -56,7 +33,8 @@
       (p/request api-endpoint
                  :request-method :post
                  :body (edn->body edn)
-                 :headers {"x-csrf-token" (response-csrf-token response)})))
+                 :headers {"x-csrf-token" (response-csrf-token response)}
+                 :content-type transit+json)))
 
 (defn test-api-request
   [state request-edn response-edn]
