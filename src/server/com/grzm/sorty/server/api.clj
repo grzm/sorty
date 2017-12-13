@@ -26,7 +26,7 @@
   component/Lifecycle
   (start [this]
     (log/info :msg "Starting FulcroAPIHandler")
-    (assoc this :env (parsing-env this env-keys)))            ;; where does this key come from?
+    (assoc this :env (parsing-env this env-keys)))
   (stop [this]
     (log/info :msg "Stopping FulcroAPIHandler")
     this))
