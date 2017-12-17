@@ -1,4 +1,4 @@
-(ns server.com.grzm.sorty.server.test.api-helpers
+(ns com.grzm.sorty.server.test.api-helpers
   (:require
     [clojure.test :refer [is]]
     [cognitect.transit :as ct]

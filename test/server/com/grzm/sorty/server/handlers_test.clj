@@ -1,7 +1,7 @@
 (ns com.grzm.sorty.server.handlers-test
   (:require
     [clojure.test :refer [are deftest is]]
-    [server.com.grzm.sorty.server.test.api-helpers :refer [test-api-request]]
+    [com.grzm.sorty.server.test.api-helpers :refer [test-api-request]]
     [com.grzm.sorty.server.test.fixture :refer [system system-init-fn]]
     [com.grzm.component.pedestal.test :refer [with-system ring-handler]]
     [peridot.core :as p]))

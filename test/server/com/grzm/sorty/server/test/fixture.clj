@@ -3,8 +3,10 @@
    [com.grzm.sorty.server.test.system :as system]))
 
 (defn system-init-fn
-  []
-  (let [res (system/system)]
-    (constantly res)))
+  ([]
+    (system-init-fn system/system))
+  ([system-fn]
+   (let [res (system-fn)]
+     (constantly res))))
 
 (def system nil)

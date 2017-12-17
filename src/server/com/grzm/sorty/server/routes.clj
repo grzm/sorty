@@ -22,6 +22,7 @@
    `handlers/api])
 
 (def routes
-  #{["/hallo" :get `handlers/hallo :route-name :hallo]
+  #{["/" :get `handlers/index :route-name :index]
+    ["/hallo" :get `handlers/hallo :route-name :hallo]
     ["/api" :get api-interceptors :route-name :api-get]
     ["/api" :post api-interceptors :route-name :api-post]})

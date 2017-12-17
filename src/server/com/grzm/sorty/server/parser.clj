@@ -17,11 +17,12 @@
 (def parser (fs/parser {:read read :mutate mutate}))
 
 (defmethod read :initial/unclassified
-  [{:keys [app] :as env} key params]
+  [{:keys [_app] :as _env} key params]
+  (log/warn ::read "here we are")
   {:value
    {:item-list/id    :unclassified
     :item-list/items [{:s-class   {:id 4 :name "spam"}
-                       :text-item {:id 1 :text "Here's some text"}}
+                       :text-item {:id 1 :text "Here's some text!!"}}
                       {:s-class   {:id 4 :name "spam"}
                        :text-item {:id 2 :text "Here's some other text"}}
                       {:s-class   {:id 4 :name "spam"}
