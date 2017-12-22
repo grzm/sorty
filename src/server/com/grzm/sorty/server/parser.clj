@@ -1,6 +1,7 @@
 (ns com.grzm.sorty.server.parser
   (:refer-clojure :exclude [read])
   (:require
+    [com.grzm.sorty.server.app :as app]
     [fulcro.server :as fs]
     [io.pedestal.log :as log]))
 
@@ -22,8 +23,12 @@
   {:value
    {:item-list/id    :unclassified
     :item-list/items [{:s-class   {:id 4 :name "spam"}
-                       :text-item {:id 1 :text "Here's some text!!"}}
+                       :text-item {:id 1 :text "Here's some text!!!!"}}
                       {:s-class   {:id 4 :name "spam"}
                        :text-item {:id 2 :text "Here's some other text"}}
                       {:s-class   {:id 4 :name "spam"}
                        :text-item {:id 3 :text "Hey, this is text, too"}}]}})
+
+(defmethod mutate 'com.grzm.sorty.client.ui.classifier/classify-item
+  [{:keys [app] :as _env} key params]
+  (log/warn ::mutate "classifying" :params params))

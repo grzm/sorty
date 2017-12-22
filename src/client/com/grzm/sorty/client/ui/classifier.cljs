@@ -56,7 +56,8 @@
                 new-state (swap! state update-in list-items-path
                                  (fn [items]
                                    (vec (filter #(not= item-ident %) items))))]
-            new-state)))
+            new-state))
+  (remote [env] true))
 
 (defn make-classify-fn [c list-id]
   (fn [{item-id :id} {class-id :id} value]
