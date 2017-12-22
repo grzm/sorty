@@ -2,12 +2,10 @@
   (:require
     [clojure.test :refer [is]]
     [cognitect.transit :as ct]
+    [com.grzm.sorty.server.fulcro-util :as fu]
     [fulcro.server :as fs]
     [io.pedestal.log :as log]
-    [peridot.core :as p]
-    [com.grzm.sorty.server.fulcro-util :as fu])
-  (:import
-    (java.io ByteArrayInputStream)))
+    [peridot.core :as p]))
 
 (def api-endpoint "/api")
 (def csrf-token-header-key "X-TEST-HELPER-CSRF")
