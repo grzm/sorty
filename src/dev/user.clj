@@ -1,7 +1,12 @@
 (ns user
   (:require
+   [clojure.tools.namespace.repl :as repl]
+   [com.grzm.sorty.server.config :as config]
+   [com.grzm.sorty.server.system :as system]
+   [com.stuartsierra.component :as component]
    [figwheel-sidecar.system :as fig.sys]
-   [com.stuartsierra.component :as component]))
+   [io.pedestal.http.route :as route]
+   [com.grzm.sorty.server.routes :as routes]))
 
 (def figwheel (atom nil))
 
@@ -24,3 +29,52 @@
                                        {:watch-paths ["resources/public/css"]})))
      (swap! figwheel component/start)
      (fig.sys/cljs-repl (:figwheel-system @figwheel)))))
+
+;;; server
+
+(def system nil)
+
+(defn init
+  "constructs the current development system"
+  []
+  (alter-var-root #'system
+                  (constantly (system/system (config/config :dev)))))
+
+(defn start
+  "Starts the current (initialized) development system"
+  []
+  (alter-var-root #'system component/start))
+
+(defn stop
+  "Shuts down and destroys the current development system"
+  []
+  (alter-var-root #'system (fn [sys]
+                             (when sys
+                               (component/stop sys)
+                               nil))))
+
+(defn go
+  "Initializes and starts the current development system"
+  []
+  (if system
+    "system not nil. Use (reset) ?"
+    (do (init)
+        (start))))
+
+(defn reset
+  "Destroys, initializes, and starts the current development system"
+  []
+  (stop)
+  (repl/refresh :after 'user/go))
+
+
+(comment
+  (require '[io.pedestal.test :refer [response-for]])
+  (require '[com.grzm.sorty.server.routes :as routes])
+  (require '[io.pedestal.http.route :as route])
+
+  (route/expand-routes routes/routes)
+  (def service  (get-in system [:pedestal :server :io.pedestal.http/service-fn]))
+  (response-for service :get "/hallo")
+
+  )
