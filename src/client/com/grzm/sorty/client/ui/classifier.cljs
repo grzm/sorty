@@ -70,17 +70,17 @@
           classify-fn (prim/get-computed this :classify-fn)]
       (prim/set-state! this {:keyboard-shortcut-handler
                              (install-shortcuts!
-                               {"Y"
+                               {events/KeyCodes.RIGHT
                                 (fn [e]
                                   (log/info (prn {:identifier (.-identifier e)
                                                   :item       item}))
                                   (classify-fn text-item s-class :yes))
-                                "N"
+                                events/KeyCodes.LEFT
                                 (fn [e]
                                   (log/info (prn {:identifier (.-identifier e)
                                                   :item       item}))
                                   (classify-fn text-item s-class :no))
-                                "S"
+                                events/KeyCodes.DOWN
                                 (fn [e]
                                   (log/info (prn {:identifier (.-identifier e)
                                                   :item       item}))
