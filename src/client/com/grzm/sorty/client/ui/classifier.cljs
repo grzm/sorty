@@ -7,6 +7,23 @@
     [goog.events :as events])
   (:import [goog.ui KeyboardShortcutHandler]))
 
+(defn install-shortcuts!
+  "Installs a keyboard shortcut handler with the given keyboard shortcuts.
+
+  A function to dispose of the handler is returned and can be used to remove the
+  handler.
+
+  Based on code from https://gist.github.com/rauhs/ec1a7b94a6481ae4cf1d"
+  [keybindings]
+  (let [handler (KeyboardShortcutHandler. js/document)]
+    (dorun (map (fn [[key ident f]]
+                  (.registerShortcut handler (str ident) key)
+                  (events/listen handler
+                                 KeyboardShortcutHandler.EventType.SHORTCUT_TRIGGERED
+                                 #(f %)))
+                keybindings))
+    #(.dispose handler)))
+
 (defui ^:once TextItem
   static prim/Ident
   (ident
@@ -29,26 +46,6 @@
 
 (def ui-text-item (prim/factory TextItem {:key-fn #(str "ti-" (get-in % [:text-item :id]))}))
 
-(defn install-shortcuts!
-  "Installs a keyboard shortcut handler
-  The key is a string the trigger is a function that will receive the keyboard event as the
-  first argument. If once? is true the keyboard shortcut is only fired once.
-  The unregister handler is returned and can be called to unregister the listener.
-
-  https://gist.github.com/rauhs/ec1a7b94a6481ae4cf1d"
-  ([keymap] (install-shortcuts! keymap true))
-  ([keymap once?]
-   (let [handler (KeyboardShortcutHandler. js/document)]
-     (dorun (map (fn [[key f]]
-                   (.registerShortcut handler (str key once?) key)
-                   (events/listen handler KeyboardShortcutHandler.EventType.SHORTCUT_TRIGGERED
-                                  (fn [e]
-                                    (f e)
-                                    (when once?
-                                      (.dispose handler)))))
-                 keymap))
-     #(.dispose handler))))
-
 (defui ^:once ClassifiableTextItem
   static prim/Ident
   (ident
@@ -65,31 +62,6 @@
      :text-item text-item})
 
   Object
-  (componentDidMount [this]
-    (let [{:keys [s-class text-item] :as item} (prim/props this)
-          classify-fn (prim/get-computed this :classify-fn)]
-      (prim/set-state! this {:keyboard-shortcut-handler
-                             (install-shortcuts!
-                               {events/KeyCodes.RIGHT
-                                (fn [e]
-                                  (log/info (prn {:identifier (.-identifier e)
-                                                  :item       item}))
-                                  (classify-fn text-item s-class :yes))
-                                events/KeyCodes.LEFT
-                                (fn [e]
-                                  (log/info (prn {:identifier (.-identifier e)
-                                                  :item       item}))
-                                  (classify-fn text-item s-class :no))
-                                events/KeyCodes.DOWN
-                                (fn [e]
-                                  (log/info (prn {:identifier (.-identifier e)
-                                                  :item       item}))
-                                  (classify-fn text-item s-class :skip))}
-                               false)})))
-
-  (componentWillUnmount [this]
-    ((prim/get-state this :keyboard-shortcut-handler)))
-
   (render [this]
     (let [{:keys [s-class text-item]}
           (prim/props this)
@@ -133,31 +105,96 @@
     (prim/transact! c `[(classify-item
                           {:list-id ~list-id :item-id ~item-id :class-id ~class-id :value ~value})])))
 
+(defmutation classify-active
+  [{:keys [list-id classification-id]}]
+  (action
+    [{:keys [state]}]
+    (let [active-index-ident [:item-list/by-id list-id
+                              :item-list/active-index]
+          active-item-ident [:item-list/by-id list-id
+                             :item-list/items (get-in @state active-index-ident)]]
+      (reset! state
+              (-> @state
+                  (assoc-in (conj active-item-ident :classification)
+                            classification-id)
+                  (update-in active-index-ident inc))))))
+
+(defn classify-active-item
+  [c list-id classification-id]
+  (let [cmd `[(classify-active {:list-id ~list-id
+                                :classification-id ~classification-id})]]
+    (prim/transact! c cmd)))
+
+(defmutation move-index
+  [{:keys [list-id direction]}]
+  (action
+    [{:keys [state]}]
+    (let [active-index-ident [:item-list/by-id list-id :item-list/active-index]]
+      (when-let [dir-fn ({:prev inc, :next dec} direction)]
+        (swap! state update-in active-index-ident dir-fn)))))
+
+(defn mv-index
+  [c list-id direction]
+  (let [cmd `[(move-index {:list-id ~list-id, :direction ~direction})]]
+    (prim/transact! c cmd)))
+
 (defui ^:once ClassifiableTextItemList
   static prim/Ident
   (ident [c {:keys [item-list/id]}]
     [:item-list/by-id id])
 
   static prim/IQuery
-  (query [_this] [:item-list/id {:item-list/items (prim/get-query ClassifiableTextItem)}])
+  (query [_this] [:item-list/active-index
+                  :item-list/id {:item-list/items (prim/get-query ClassifiableTextItem)}])
 
   static prim/InitialAppState
   (initial-state
     [c {:keys [item-list/id item-list/items]}]
     {:item-list/id    id
-     :item-list/items []})
+     :item-list/items []
+     :item-list/active-index 0})
 
   Object
+  (componentDidMount [this]
+    (let [{:keys [item-list/id]} (prim/props this)]
+      (prim/set-state! this {:keyboard-shortcut-handler
+                             (install-shortcuts!
+                               [[events/KeyCodes.UP :next-item
+                                 (fn [e]
+                                   (when (= (.-identifier e) (str :next-item))
+                                     (mv-index this id :next)))]
+                                [events/KeyCodes.DOWN :prev-item
+                                 (fn [e]
+                                   (when (= (.-identifier e) (str :prev-item))
+                                     (mv-index this id :prev)))]
+                                [events/KeyCodes.A :not-member
+                                 (fn [e]
+                                   (when (= (.-identifier e) (str :not-member))
+                                     (classify-active-item this id :not-member)))]
+                                [events/KeyCodes.D :member
+                                 (fn [e]
+                                   (when (= (.-identifier e) (str :member))
+                                     (classify-active-item this id :member)))]
+                                [events/KeyCodes.S :skip
+                                 (fn [e]
+                                   (when (= (.-identifier e) (str :skip))
+                                     (classify-active-item this id :skip)))]])})))
+  (componentWillUnmount [this]
+    ((prim/get-state this :keyboard-shortcut-handler)))
+
   (render [this]
-    (let [{:keys [item-list/id item-list/items]} (prim/props this)
+    (let [{:keys [item-list/active-index item-list/id item-list/items]} (prim/props this)
           classify-fn (make-classify-fn this id)]
       (dom/div
         nil
         (if (seq items)
           (apply dom/ol #js {:className "list-group"}
-                 (conj (map #(ui-text-item %) (rest items))
-                       (ui-classifiable-text-item
-                         (prim/computed (first items) {:classify-fn classify-fn}))))
+                 (map-indexed (fn [i item]
+                                (if (= active-index i)
+                                  (ui-classifiable-text-item
+                                    (prim/computed item {:classify-fn classify-fn}))
+                                  (ui-text-item item)))
+                              items))
           (dom/p nil "no more items"))))))
 
 (def ui-classifiable-text-item-list (prim/factory ClassifiableTextItemList))

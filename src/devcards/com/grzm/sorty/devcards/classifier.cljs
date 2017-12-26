@@ -35,7 +35,8 @@
    :fulcro       {:started-callback
                   (fn [app]
                     (fc/merge-state! app classifier/ClassifiableTextItemList
-                                     {:item-list/id    :unclassified
+                                     {:item-list/active-index 0
+                                      :item-list/id    :unclassified
                                       :item-list/items (mapv #(hash-map
                                                                 :s-class {:id 4 :name "spam"}
                                                                 :text-item {:id    %
