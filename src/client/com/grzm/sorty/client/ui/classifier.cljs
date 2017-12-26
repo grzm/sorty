@@ -2,40 +2,41 @@
   (:require
     [fulcro.client.dom :as dom]
     [fulcro.client.logging :as log]
-    [fulcro.client.mutations :as m :refer [defmutation]]
+    [fulcro.client.mutations :refer [defmutation]]
     [fulcro.client.primitives :as prim :refer-macros [defui]]
-    [goog.events :as events])
+    [goog.events :as events]
+    [goog.ui.KeyboardShortcutHandler :as ksh])
   (:import [goog.ui KeyboardShortcutHandler]))
 
 (defn install-shortcuts!
   "Installs a keyboard shortcut handler with the given keyboard shortcuts.
 
-  A function to dispose of the handler is returned and can be used to remove the
-  handler.
+  A function to dispose of the handler is returned and can be used to remove
+  the handler.
 
   Based on code from https://gist.github.com/rauhs/ec1a7b94a6481ae4cf1d"
-  [keybindings]
+  [key-bindings]
   (let [handler (KeyboardShortcutHandler. js/document)]
     (dorun (map (fn [[key ident f]]
                   (.registerShortcut handler (str ident) key)
                   (events/listen handler
-                                 KeyboardShortcutHandler.EventType.SHORTCUT_TRIGGERED
+                                 ksh/EventType.SHORTCUT_TRIGGERED
                                  #(f %)))
-                keybindings))
+                key-bindings))
     #(.dispose handler)))
 
 (defui ^:once TextItem
   static prim/Ident
   (ident
-    [_c {:keys [text-item] :as _props}]
+    [_ {:keys [text-item]}]
     [:classifiable-text-item/by-id (:id text-item)])
 
   static prim/IQuery
-  (query [_this] [:s-class :text-item])
+  (query [_] [:s-class :text-item])
 
   static prim/InitialAppState
   (initial-state
-    [_c {:keys [s-class text-item] :as _params}]
+    [_ {:keys [s-class text-item]}]
     {:s-class   s-class
      :text-item text-item})
 
@@ -49,15 +50,15 @@
 (defui ^:once ClassifiableTextItem
   static prim/Ident
   (ident
-    [c {:keys [text-item] :as props}]
+    [_ {:keys [text-item]}]
     [:classifiable-text-item/by-id (:id text-item)])
 
   static prim/IQuery
-  (query [this] [:s-class :text-item])
+  (query [_] [:s-class :text-item])
 
   static prim/InitialAppState
   (initial-state
-    [c {:keys [s-class text-item] :as params}]
+    [_ {:keys [s-class text-item]}]
     {:s-class   s-class
      :text-item text-item})
 
@@ -161,7 +162,7 @@
 
   static prim/InitialAppState
   (initial-state
-    [c {:keys [item-list/id item-list/items]}]
+    [_ {:keys [item-list/id]}]
     {:item-list/id    id
      :item-list/items []
      :item-list/active-index 0})
