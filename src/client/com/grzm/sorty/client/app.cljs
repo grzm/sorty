@@ -12,7 +12,6 @@
   app
   (atom (fc/new-fulcro-client
           :started-callback (fn [app]
-                              (log/warn "calling callback!")
                               (df/load app :initial/unclassified classifier/ClassifiableTextItemList
                                        {:refresh [:fulcro/force-root]})))))
 
