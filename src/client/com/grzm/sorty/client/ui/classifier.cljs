@@ -111,7 +111,7 @@
                                        :onClick #(classify-fn text-item s-class :skip)} "skip"))))))))
 
 (def ui-classifiable-text-item
-  (prim/factory ClassifiableTextItem {:keyfn #(str "cti-" (get-in % [:text-item :id]))}))
+  (prim/factory ClassifiableTextItem {:key-fn #(str "cti-" (get-in % [:text-item :id]))}))
 
 (defmutation classify-item
   "Classify item"
