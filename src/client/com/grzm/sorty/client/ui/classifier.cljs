@@ -62,6 +62,30 @@
      :text-item text-item})
 
   Object
+  (componentDidMount [this]
+    (let [{:keys [s-class text-item]} (prim/props this)
+          classify-fn (prim/get-computed this :classify-fn)]
+      (prim/set-state! this {:shortcut-handler
+                             (install-shortcuts!
+                               [[events/KeyCodes.A :not-member
+                                 (fn [e]
+                                   (when (= (.-identifier e) (str :not-member))
+                                     (classify-fn text-item s-class)))]
+                                [events/KeyCodes.D :member
+                                 (fn [e]
+                                   (when (= (.-identifier e) (str :member))
+                                     (classify-fn text-item s-class)))]
+                                [events/KeyCodes.S :skip
+                                 (fn [e]
+                                   (when (= (.-identifier e) (str :skip))
+                                     (classify-fn text-item s-class)))]])})))
+
+  (componentWillUnmount [this]
+    ;; why do I need this when-let?
+    (when-let [dispose-of-handler
+               (prim/get-state this :shortcut-handler)]
+      (dispose-of-handler)))
+
   (render [this]
     (let [{:keys [s-class text-item]}
           (prim/props this)
@@ -94,10 +118,12 @@
   (action [{:keys [state]}]
           (let [item-ident [:classifiable-text-item/by-id item-id]
                 list-items-path [:item-list/by-id list-id :item-list/items]
-                new-state (swap! state update-in list-items-path
-                                 (fn [items]
-                                   (vec (filter #(not= item-ident %) items))))]
-            new-state))
+                item-count (count (get-in @state list-items-path))
+                active-index-ident [:item-list/by-id list-id
+                                    :item-list/active-index]
+                active-index (get-in @state active-index-ident)]
+            (if (< active-index (dec item-count))
+              (swap! state update-in active-index-ident inc))))
   (remote [env] true))
 
 (defn make-classify-fn [c list-id]
@@ -105,33 +131,19 @@
     (prim/transact! c `[(classify-item
                           {:list-id ~list-id :item-id ~item-id :class-id ~class-id :value ~value})])))
 
-(defmutation classify-active
-  [{:keys [list-id classification-id]}]
-  (action
-    [{:keys [state]}]
-    (let [active-index-ident [:item-list/by-id list-id
-                              :item-list/active-index]
-          active-item-ident [:item-list/by-id list-id
-                             :item-list/items (get-in @state active-index-ident)]]
-      (reset! state
-              (-> @state
-                  (assoc-in (conj active-item-ident :classification)
-                            classification-id)
-                  (update-in active-index-ident inc))))))
-
-(defn classify-active-item
-  [c list-id classification-id]
-  (let [cmd `[(classify-active {:list-id ~list-id
-                                :classification-id ~classification-id})]]
-    (prim/transact! c cmd)))
-
 (defmutation move-index
   [{:keys [list-id direction]}]
   (action
     [{:keys [state]}]
-    (let [active-index-ident [:item-list/by-id list-id :item-list/active-index]]
-      (when-let [dir-fn ({:prev inc, :next dec} direction)]
-        (swap! state update-in active-index-ident dir-fn)))))
+    (let [active-index-ident [:item-list/by-id list-id :item-list/active-index]
+          active-index (get-in @state active-index-ident)
+          item-count (count (get-in @state [:item-list/by-id list-id
+                                            :item-list/items]))]
+      (case direction
+        :prev (when (< 0 active-index)
+                (swap! state update-in active-index-ident dec))
+        :next (when (< active-index (dec item-count))
+                (swap! state update-in active-index-ident inc))))))
 
 (defn mv-index
   [c list-id direction]
@@ -157,30 +169,18 @@
   Object
   (componentDidMount [this]
     (let [{:keys [item-list/id]} (prim/props this)]
-      (prim/set-state! this {:keyboard-shortcut-handler
+      (prim/set-state! this {:shortcut-handler
                              (install-shortcuts!
-                               [[events/KeyCodes.UP :next-item
-                                 (fn [e]
-                                   (when (= (.-identifier e) (str :next-item))
-                                     (mv-index this id :next)))]
-                                [events/KeyCodes.DOWN :prev-item
+                               [[events/KeyCodes.UP :prev-item
                                  (fn [e]
                                    (when (= (.-identifier e) (str :prev-item))
                                      (mv-index this id :prev)))]
-                                [events/KeyCodes.A :not-member
+                                [events/KeyCodes.DOWN :next-item
                                  (fn [e]
-                                   (when (= (.-identifier e) (str :not-member))
-                                     (classify-active-item this id :not-member)))]
-                                [events/KeyCodes.D :member
-                                 (fn [e]
-                                   (when (= (.-identifier e) (str :member))
-                                     (classify-active-item this id :member)))]
-                                [events/KeyCodes.S :skip
-                                 (fn [e]
-                                   (when (= (.-identifier e) (str :skip))
-                                     (classify-active-item this id :skip)))]])})))
+                                   (when (= (.-identifier e) (str :next-item))
+                                     (mv-index this id :next)))]])})))
   (componentWillUnmount [this]
-    ((prim/get-state this :keyboard-shortcut-handler)))
+    ((prim/get-state this :shortcut-handler)))
 
   (render [this]
     (let [{:keys [item-list/active-index item-list/id item-list/items]} (prim/props this)
