@@ -18,12 +18,16 @@
   [key-bindings]
   (let [handler (KeyboardShortcutHandler. js/document)]
     (dorun (map (fn [[key ident f]]
-                  (.registerShortcut handler (str ident) key)
-                  (events/listen handler
-                                 ksh/EventType.SHORTCUT_TRIGGERED
-                                 #(f %)))
+                  (let [identifier (str ident)
+                        trigger (fn [e]
+                                  (when (= (.-identifier e) identifier)
+                                    (f e)))]
+                    (.registerShortcut handler identifier key)
+                    (events/listen handler
+                                   ksh/EventType.SHORTCUT_TRIGGERED
+                                   #(trigger %))))
                 key-bindings))
-    #(.dispose handler)))
+    handler))
 
 (defui ^:once TextItem
   static prim/Ident
@@ -35,9 +39,9 @@
   static prim/InitialAppState
   (initial-state
     [_ {:keys [item/id item/text s-class]}]
-    {:item/id      id
-     :item/text    text
-     :s-class s-class})
+    {:item/id   id
+     :item/text text
+     :s-class   s-class})
 
   Object
   (render [this]
@@ -70,23 +74,16 @@
       (prim/set-state! this {:shortcut-handler
                              (install-shortcuts!
                                [[events/KeyCodes.A :not-member
-                                 (fn [e]
-                                   (when (= (.-identifier e) (str :not-member))
-                                     (classify-fn id s-class :no)))]
+                                 #(classify-fn id s-class :no)]
                                 [events/KeyCodes.D :member
-                                 (fn [e]
-                                   (when (= (.-identifier e) (str :member))
-                                     (classify-fn id s-class :yes)))]
+                                 #(classify-fn id s-class :yes)]
                                 [events/KeyCodes.S :skip
-                                 (fn [e]
-                                   (when (= (.-identifier e) (str :skip))
-                                     (classify-fn id s-class :skip)))]])})))
+                                 #(classify-fn id s-class :skip)]])})))
 
   (componentWillUnmount [this]
     ;; why do I need this when-let?
-    (when-let [dispose-of-handler
-               (prim/get-state this :shortcut-handler)]
-      (dispose-of-handler)))
+    (when-let [handler (prim/get-state this :shortcut-handler)]
+      (.dispose handler)))
 
   (render [this]
     (let [{:keys [item/id item/text member? s-class]} (prim/props this)
@@ -182,15 +179,11 @@
       (prim/set-state! this {:shortcut-handler
                              (install-shortcuts!
                                [[events/KeyCodes.UP :prev-item
-                                 (fn [e]
-                                   (when (= (.-identifier e) (str :prev-item))
-                                     (mv-index this id :prev)))]
+                                 #(mv-index this id :prev)]
                                 [events/KeyCodes.DOWN :next-item
-                                 (fn [e]
-                                   (when (= (.-identifier e) (str :next-item))
-                                     (mv-index this id :next)))]])})))
+                                 #(mv-index this id :next)]])})))
   (componentWillUnmount [this]
-    ((prim/get-state this :shortcut-handler)))
+    (.dispose (prim/get-state this :shortcut-handler)))
 
   (render [this]
     (let [{:keys [queue/active-index queue/id queue/items]} (prim/props this)
