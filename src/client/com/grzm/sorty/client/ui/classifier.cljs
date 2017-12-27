@@ -103,12 +103,15 @@
                      (when member?
                        (dom/p nil (str member?))))
             (dom/div #js {:className "form-check"}
-                     (classify-button {:value   "yes"
-                                       :onClick #(classify-fn id s-class :yes)} "yes")
-                     (classify-button {:value   "no"
-                                       :onClick #(classify-fn id s-class :no)} "no")
-                     (classify-button {:value   "skip"
-                                       :onClick #(classify-fn id s-class :skip)} "skip"))))))))
+                     (classify-button
+                       {:value   "yes"
+                        :onClick #(classify-fn id s-class :yes)} "yes")
+                     (classify-button
+                       {:value   "no"
+                        :onClick #(classify-fn id s-class :no)} "no")
+                     (classify-button
+                       {:value   "skip"
+                        :onClick #(classify-fn id s-class :skip)} "skip"))))))))
 
 (def ui-active-text-item (prim/factory ActiveTextItem {:key-fn :item/id}))
 
