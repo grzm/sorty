@@ -27,21 +27,21 @@
 
 (defui ^:once TextItem
   static prim/Ident
-  (ident [_ {:keys [id]}] [:text-item/by-id id])
+  (ident [_ {:keys [item/id]}] [:item/by-id id])
 
   static prim/IQuery
-  (query [_] [:id :text :s-class])
+  (query [_] [:item/id :item/text :s-class])
 
   static prim/InitialAppState
   (initial-state
-    [_ {:keys [id text s-class]}]
-    {:id      id
-     :text    text
+    [_ {:keys [item/id item/text s-class]}]
+    {:item/id      id
+     :item/text    text
      :s-class s-class})
 
   Object
   (render [this]
-    (let [{:keys [id text member?]} (prim/props this)]
+    (let [{:keys [item/id item/text member?]} (prim/props this)]
       (dom/li nil
               (dom/p nil text)
               (when member?
@@ -51,21 +51,21 @@
 
 (defui ^:once ActiveTextItem
   static prim/Ident
-  (ident [_ {:keys [id]}] [:text-item/by-id id])
+  (ident [_ {:keys [item/id]}] [:item/by-id id])
 
   static prim/IQuery
-  (query [_] [:id :text :member? :s-class])
+  (query [_] [:item/id :item/text :member? :s-class])
 
   static prim/InitialAppState
   (initial-state
-    [_ {:keys [id text s-class]}]
-    {:id      id
-     :text    text
-     :s-class s-class})
+    [_ {:keys [item/id item/text s-class]}]
+    {:item/id   id
+     :item/text text
+     :s-class   s-class})
 
   Object
   (componentDidMount [this]
-    (let [{:keys [id s-class]} (prim/props this)
+    (let [{:keys [item/id s-class]} (prim/props this)
           classify-fn (prim/get-computed this :classify-fn)]
       (prim/set-state! this {:shortcut-handler
                              (install-shortcuts!
@@ -89,7 +89,7 @@
       (dispose-of-handler)))
 
   (render [this]
-    (let [{:keys [id text member? s-class]} (prim/props this)
+    (let [{:keys [item/id item/text member? s-class]} (prim/props this)
           classify-fn (prim/get-computed this :classify-fn)
           default-attrs {:className "btn btn-primary" :type "button"}
           classify-button (fn [attrs text]
@@ -113,13 +113,13 @@
                      (classify-button {:value   "skip"
                                        :onClick #(classify-fn id s-class :skip)} "skip"))))))))
 
-(def ui-active-text-item (prim/factory ActiveTextItem {:key-fn :id}))
+(def ui-active-text-item (prim/factory ActiveTextItem {:key-fn :item/id}))
 
 (defmutation classify-item
   "Classify item"
   [{:keys [list-id item-id class-id value]}]
   (action [{:keys [state]}]
-          (let [item-ident [:text-item/by-id item-id]
+          (let [item-ident [:item/by-id item-id]
                 list-items-path [:queue/by-id list-id :queue/items]
                 item-count (count (get-in @state list-items-path))
                 active-index-ident [:queue/by-id list-id

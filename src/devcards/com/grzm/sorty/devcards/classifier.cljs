@@ -31,7 +31,7 @@
                       {:queue/active-index 0
                        :queue/id           :unclassified
                        :queue/items        (mapv #(hash-map
-                                                    :id %
-                                                    :text (str "Text item " %)
+                                                    :item/id %
+                                                    :item/text (str "Text item " %)
                                                     :s-class {:id 4 :name "spam"})
                                                  (range 10))}))}})
