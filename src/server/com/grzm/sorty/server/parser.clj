@@ -18,16 +18,28 @@
 (def parser (fs/parser {:read read :mutate mutate}))
 
 (defmethod read :initial/unclassified
-  [{:keys [_app] :as _env} key params]
-  (log/warn ::read "here we are")
+  [{:keys [_app] :as _env} _ _]
   {:value
-   {:item-list/id    :unclassified
-    :item-list/items [{:s-class   {:id 4 :name "spam"}
-                       :text-item {:id 1 :text "Here's some text!!!!"}}
-                      {:s-class   {:id 4 :name "spam"}
-                       :text-item {:id 2 :text "Here's some other text"}}
-                      {:s-class   {:id 4 :name "spam"}
-                       :text-item {:id 3 :text "Hey, this is text, too"}}]}})
+   {:queue/active-index 0
+    :queue/id           :unclassified
+    :queue/items        [{:s-class   {:id 4 :name "spam"}
+                          :text-item {:id 1 :text "Here's some text!!!!"}}
+                         {:s-class   {:id 4 :name "spam"}
+                          :text-item {:id 2 :text "Here's some other text"}}
+                         {:s-class   {:id 4 :name "spam"}
+                          :text-item {:id 3 :text "Hey, this is text, too"}}
+                         {:s-class   {:id 4 :name "spam"}
+                          :text-item {:id 4 :text "Hey, this is text, too"}}
+                         {:s-class   {:id 4 :name "spam"}
+                          :text-item {:id 5 :text "Hey, this is text, too"}}
+                         {:s-class   {:id 4 :name "spam"}
+                          :text-item {:id 6 :text "Hey, this is text, too"}}
+                         {:s-class   {:id 4 :name "spam"}
+                          :text-item {:id 7 :text "Hey, this is text, too"}}
+                         {:s-class   {:id 4 :name "spam"}
+                          :text-item {:id 8 :text "Hey, this is text, too"}}
+                         {:s-class   {:id 4 :name "spam"}
+                          :text-item {:id 9 :text "Hey, this is text, too"}}]}})
 
 (defmethod mutate 'com.grzm.sorty.client.ui.classifier/classify-item
   [{:keys [app] :as _env} key params]

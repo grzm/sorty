@@ -27,9 +27,7 @@
 
 (defui ^:once TextItem
   static prim/Ident
-  (ident
-    [_ {:keys [text-item]}]
-    [:classifiable-text-item/by-id (:id text-item)])
+  (ident [_ {:keys [text-item]}] [:text-item/by-id (:id text-item)])
 
   static prim/IQuery
   (query [_] [:s-class :text-item])
@@ -45,13 +43,11 @@
     (let [{:keys [text-item]} (prim/props this)]
       (dom/li nil (:text text-item)))))
 
-(def ui-text-item (prim/factory TextItem {:key-fn #(str "ti-" (get-in % [:text-item :id]))}))
+(def ui-text-item (prim/factory TextItem {:key-fn #(get-in % [:text-item :id])}))
 
-(defui ^:once ClassifiableTextItem
+(defui ^:once ActiveTextItem
   static prim/Ident
-  (ident
-    [_ {:keys [text-item]}]
-    [:classifiable-text-item/by-id (:id text-item)])
+  (ident [_ {:keys [text-item]}] [:text-item/by-id (:id text-item)])
 
   static prim/IQuery
   (query [_] [:s-class :text-item])
@@ -96,12 +92,12 @@
                             (dom/button (clj->js (merge default-attrs attrs)) text))]
       (dom/li
         #js {:id (:id text-item)}
-        (dom/div nil (:text text-item))
         (dom/form
           nil
           (dom/fieldset
             nil
             (dom/legend nil "Is this " (dom/strong nil (:name s-class)) "?")
+            (dom/div nil (:text text-item))
             (dom/div #js {:className "form-check"}
                      (classify-button {:value   "yes"
                                        :onClick #(classify-fn text-item s-class :yes)} "yes")
@@ -110,18 +106,18 @@
                      (classify-button {:value   "skip"
                                        :onClick #(classify-fn text-item s-class :skip)} "skip"))))))))
 
-(def ui-classifiable-text-item
-  (prim/factory ClassifiableTextItem {:key-fn #(str "cti-" (get-in % [:text-item :id]))}))
+(def ui-active-text-item
+  (prim/factory ActiveTextItem {:key-fn #(get-in % [:text-item :id])}))
 
 (defmutation classify-item
   "Classify item"
   [{:keys [list-id item-id class-id value]}]
   (action [{:keys [state]}]
-          (let [item-ident [:classifiable-text-item/by-id item-id]
-                list-items-path [:item-list/by-id list-id :item-list/items]
+          (let [item-ident [:text-item/by-id item-id]
+                list-items-path [:queue/by-id list-id :queue/items]
                 item-count (count (get-in @state list-items-path))
-                active-index-ident [:item-list/by-id list-id
-                                    :item-list/active-index]
+                active-index-ident [:queue/by-id list-id
+                                    :queue/active-index]
                 active-index (get-in @state active-index-ident)]
             (if (< active-index (dec item-count))
               (swap! state update-in active-index-ident inc))))
@@ -130,16 +126,19 @@
 (defn make-classify-fn [c list-id]
   (fn [{item-id :id} {class-id :id} value]
     (prim/transact! c `[(classify-item
-                          {:list-id ~list-id :item-id ~item-id :class-id ~class-id :value ~value})])))
+                          {:list-id ~list-id,
+                           :item-id ~item-id,
+                           :class-id ~class-id,
+                           :value ~value})])))
 
 (defmutation move-index
   [{:keys [list-id direction]}]
   (action
     [{:keys [state]}]
-    (let [active-index-ident [:item-list/by-id list-id :item-list/active-index]
+    (let [active-index-ident [:queue/by-id list-id :queue/active-index]
           active-index (get-in @state active-index-ident)
-          item-count (count (get-in @state [:item-list/by-id list-id
-                                            :item-list/items]))]
+          item-count (count (get-in @state [:queue/by-id list-id
+                                            :queue/items]))]
       (case direction
         :prev (when (< 0 active-index)
                 (swap! state update-in active-index-ident dec))
@@ -151,25 +150,24 @@
   (let [cmd `[(move-index {:list-id ~list-id, :direction ~direction})]]
     (prim/transact! c cmd)))
 
-(defui ^:once ClassifiableTextItemList
+(defui ^:once QueueList
   static prim/Ident
-  (ident [c {:keys [item-list/id]}]
-    [:item-list/by-id id])
+  (ident [_ {:keys [queue/id]}] [:queue/by-id id])
 
   static prim/IQuery
-  (query [_this] [:item-list/active-index
-                  :item-list/id {:item-list/items (prim/get-query ClassifiableTextItem)}])
+  (query [_this] [:queue/active-index
+                  :queue/id {:queue/items (prim/get-query ActiveTextItem)}])
 
   static prim/InitialAppState
   (initial-state
-    [_ {:keys [item-list/id]}]
-    {:item-list/id    id
-     :item-list/items []
-     :item-list/active-index 0})
+    [_ {:keys [queue/id]}]
+    {:queue/id    id
+     :queue/items []
+     :queue/active-index 0})
 
   Object
   (componentDidMount [this]
-    (let [{:keys [item-list/id]} (prim/props this)]
+    (let [{:keys [queue/id]} (prim/props this)]
       (prim/set-state! this {:shortcut-handler
                              (install-shortcuts!
                                [[events/KeyCodes.UP :prev-item
@@ -184,7 +182,7 @@
     ((prim/get-state this :shortcut-handler)))
 
   (render [this]
-    (let [{:keys [item-list/active-index item-list/id item-list/items]} (prim/props this)
+    (let [{:keys [queue/active-index queue/id queue/items]} (prim/props this)
           classify-fn (make-classify-fn this id)]
       (dom/div
         nil
@@ -192,10 +190,10 @@
           (apply dom/ol #js {:className "list-group"}
                  (map-indexed (fn [i item]
                                 (if (= active-index i)
-                                  (ui-classifiable-text-item
+                                  (ui-active-text-item
                                     (prim/computed item {:classify-fn classify-fn}))
                                   (ui-text-item item)))
                               items))
           (dom/p nil "no more items"))))))
 
-(def ui-classifiable-text-item-list (prim/factory ClassifiableTextItemList))
+(def ui-queue-list (prim/factory QueueList))

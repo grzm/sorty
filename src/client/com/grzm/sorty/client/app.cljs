@@ -12,7 +12,7 @@
   app
   (atom (fc/new-fulcro-client
           :started-callback (fn [app]
-                              (df/load app :initial/unclassified classifier/ClassifiableTextItemList
+                              (df/load app :initial/unclassified classifier/QueueList
                                        {:refresh [:fulcro/force-root]})))))
 
 (defui ^:once Root
@@ -21,19 +21,19 @@
   (query
     [this]
     [:ui/react-key
-     {:unclassified (prim/get-query classifier/ClassifiableTextItemList)}])
+     {:unclassified (prim/get-query classifier/QueueList)}])
 
   static prim/InitialAppState
   (initial-state
     [c params]
     {:unclassified (prim/get-initial-state
-                     classifier/ClassifiableTextItemList {:item-list/id :unclassified})})
+                     classifier/QueueList {:queue/id :unclassified})})
 
   Object
   (render [this]
           (let [{:keys [ui/react-key unclassified]} (prim/props this)]
             (dom/div #js {:key react-key}
-                     (classifier/ui-classifiable-text-item-list unclassified)))))
+                     (classifier/ui-queue-list unclassified)))))
 
 (defn mount
   "Helper function to mount app, isolating mount point from callers."
