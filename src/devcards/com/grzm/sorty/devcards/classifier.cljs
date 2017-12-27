@@ -7,26 +7,18 @@
     [fulcro.client.dom :as dom]
     [fulcro.client.logging :as log]
     [fulcro.client.mutations :as m :refer [defmutation]]
-    [fulcro.client.primitives :as prim :refer-macros [defui]]))
+    [fulcro.client.primitives :as prim :refer-macros [defsc defui]]))
 
-(defui ^:once QueueListRoot
-  static prim/IQuery
-  (query
-    [this]
-    [:ui/react-key
-     {:unclassified (prim/get-query classifier/QueueList)}])
-
-  static prim/InitialAppState
-  (initial-state [_ _]
-    {:unclassified (prim/get-initial-state classifier/QueueList {:queue/id :unclassified})})
-
-  Object
-  (render
-    [this]
-    (let [{:keys [ui/react-key unclassified]} (prim/props this)]
-      (dom/div
-        #js {:key react-key}
-        (classifier/ui-queue-list unclassified)))))
+(defsc QueueListRoot
+  [this {:keys [ui/react-key unclassified]}]
+  {:query         [:ui/react-key
+                   {:unclassified (prim/get-query classifier/QueueList)}]
+   :initial-state (fn [_]
+                    {:unclassified (prim/get-initial-state
+                                     classifier/QueueList {:queue/id :unclassified})})}
+  (dom/div
+    #js {:key react-key}
+    (classifier/ui-queue-list unclassified)))
 
 (defcard-fulcro queue-list
   QueueListRoot
@@ -39,7 +31,7 @@
                       {:queue/active-index 0
                        :queue/id           :unclassified
                        :queue/items        (mapv #(hash-map
-                                                    :s-class {:id 4 :name "spam"}
-                                                    :text-item {:id   %
-                                                                :text (str "Text item " %)})
+                                                    :id %
+                                                    :text (str "Text item " %)
+                                                    :s-class {:id 4 :name "spam"})
                                                  (range 10))}))}})

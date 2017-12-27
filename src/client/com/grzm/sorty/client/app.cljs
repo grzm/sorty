@@ -4,7 +4,7 @@
     [fulcro.client.data-fetch :as df]
     [fulcro.client.dom :as dom]
     [fulcro.client.logging :as log]
-    [fulcro.client.primitives :as prim :refer [defui]]
+    [fulcro.client.primitives :as prim :refer [defui defsc]]
     [com.grzm.sorty.client.ui.classifier :as classifier]))
 
 (defonce
@@ -15,25 +15,15 @@
                               (df/load app :initial/unclassified classifier/QueueList
                                        {:refresh [:fulcro/force-root]})))))
 
-(defui ^:once Root
+(defsc Root
   "Application root"
-  static prim/IQuery
-  (query
-    [this]
-    [:ui/react-key
-     {:unclassified (prim/get-query classifier/QueueList)}])
-
-  static prim/InitialAppState
-  (initial-state
-    [c params]
-    {:unclassified (prim/get-initial-state
-                     classifier/QueueList {:queue/id :unclassified})})
-
-  Object
-  (render [this]
-          (let [{:keys [ui/react-key unclassified]} (prim/props this)]
-            (dom/div #js {:key react-key}
-                     (classifier/ui-queue-list unclassified)))))
+  [this {:keys [ui/react-key unclassified]}]
+  {:query         [:ui/react-key {:unclassified (prim/get-query classifier/QueueList)}]
+   :initial-state (fn [_]
+                    {:unclassified (prim/get-initial-state
+                                     classifier/QueueList {:queue/id :unclassified})})}
+  (dom/div #js {:key react-key}
+           (classifier/ui-queue-list unclassified)))
 
 (defn mount
   "Helper function to mount app, isolating mount point from callers."

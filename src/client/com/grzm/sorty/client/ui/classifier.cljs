@@ -3,7 +3,7 @@
     [fulcro.client.dom :as dom]
     [fulcro.client.logging :as log]
     [fulcro.client.mutations :refer [defmutation]]
-    [fulcro.client.primitives :as prim :refer-macros [defui]]
+    [fulcro.client.primitives :as prim :refer-macros [defsc defui]]
     [goog.events :as events]
     [goog.ui.KeyboardShortcutHandler :as ksh])
   (:import [goog.ui KeyboardShortcutHandler]))
@@ -27,58 +27,60 @@
 
 (defui ^:once TextItem
   static prim/Ident
-  (ident [_ {:keys [text-item]}] [:text-item/by-id (:id text-item)])
+  (ident [_ {:keys [id]}] [:text-item/by-id id])
 
   static prim/IQuery
-  (query [_] [:s-class :text-item])
+  (query [_] [:id :text :s-class])
 
   static prim/InitialAppState
   (initial-state
-    [_ {:keys [s-class text-item]}]
-    {:s-class   s-class
-     :text-item text-item})
+    [_ {:keys [id text s-class]}]
+    {:id      id
+     :text    text
+     :s-class s-class})
 
   Object
   (render [this]
-    (let [{:keys [text-item]} (prim/props this)]
+    (let [{:keys [id text member?]} (prim/props this)]
       (dom/li nil
-              (dom/p nil (:text text-item))
-              (when-let [member? (:member? text-item)]
+              (dom/p nil text)
+              (when member?
                 (dom/p nil (str member?)))))))
 
-(def ui-text-item (prim/factory TextItem {:key-fn #(get-in % [:text-item :id])}))
+(def ui-text-item (prim/factory TextItem {:key-fn :id}))
 
 (defui ^:once ActiveTextItem
   static prim/Ident
-  (ident [_ {:keys [text-item]}] [:text-item/by-id (:id text-item)])
+  (ident [_ {:keys [id]}] [:text-item/by-id id])
 
   static prim/IQuery
-  (query [_] [:s-class :text-item])
+  (query [_] [:id :text :member? :s-class])
 
   static prim/InitialAppState
   (initial-state
-    [_ {:keys [s-class text-item]}]
-    {:s-class   s-class
-     :text-item text-item})
+    [_ {:keys [id text s-class]}]
+    {:id      id
+     :text    text
+     :s-class s-class})
 
   Object
   (componentDidMount [this]
-    (let [{:keys [s-class text-item]} (prim/props this)
+    (let [{:keys [id s-class]} (prim/props this)
           classify-fn (prim/get-computed this :classify-fn)]
       (prim/set-state! this {:shortcut-handler
                              (install-shortcuts!
                                [[events/KeyCodes.A :not-member
                                  (fn [e]
                                    (when (= (.-identifier e) (str :not-member))
-                                     (classify-fn text-item s-class :no)))]
+                                     (classify-fn id s-class :no)))]
                                 [events/KeyCodes.D :member
                                  (fn [e]
                                    (when (= (.-identifier e) (str :member))
-                                     (classify-fn text-item s-class :yes)))]
+                                     (classify-fn id s-class :yes)))]
                                 [events/KeyCodes.S :skip
                                  (fn [e]
                                    (when (= (.-identifier e) (str :skip))
-                                     (classify-fn text-item s-class :skip)))]])})))
+                                     (classify-fn id s-class :skip)))]])})))
 
   (componentWillUnmount [this]
     ;; why do I need this when-let?
@@ -87,33 +89,31 @@
       (dispose-of-handler)))
 
   (render [this]
-    (let [{:keys [s-class text-item]}
-          (prim/props this)
+    (let [{:keys [id text member? s-class]} (prim/props this)
           classify-fn (prim/get-computed this :classify-fn)
           default-attrs {:className "btn btn-primary" :type "button"}
           classify-button (fn [attrs text]
                             (dom/button (clj->js (merge default-attrs attrs)) text))]
       (dom/li
-        #js {:id (:id text-item)}
+        nil
         (dom/form
           nil
           (dom/fieldset
             nil
             (dom/legend nil "Is this " (dom/strong nil (:name s-class)) "?")
             (dom/div nil
-                     (dom/p nil (:text text-item))
-                     (when-let [member? (:member? text-item)]
+                     (dom/p nil text)
+                     (when member?
                        (dom/p nil (str member?))))
             (dom/div #js {:className "form-check"}
                      (classify-button {:value   "yes"
-                                       :onClick #(classify-fn text-item s-class :yes)} "yes")
+                                       :onClick #(classify-fn id s-class :yes)} "yes")
                      (classify-button {:value   "no"
-                                       :onClick #(classify-fn text-item s-class :no)} "no")
+                                       :onClick #(classify-fn id s-class :no)} "no")
                      (classify-button {:value   "skip"
-                                       :onClick #(classify-fn text-item s-class :skip)} "skip"))))))))
+                                       :onClick #(classify-fn id s-class :skip)} "skip"))))))))
 
-(def ui-active-text-item
-  (prim/factory ActiveTextItem {:key-fn #(get-in % [:text-item :id])}))
+(def ui-active-text-item (prim/factory ActiveTextItem {:key-fn :id}))
 
 (defmutation classify-item
   "Classify item"
@@ -131,11 +131,11 @@
                                    (update-in active-index-ident inc)
 
                                    true
-                                   (assoc-in (conj item-ident :text-item :member?) value))))))
+                                   (assoc-in (conj item-ident :member?) value))))))
   (remote [env] true))
 
 (defn make-classify-fn [c list-id]
-  (fn [{item-id :id} {class-id :id} value]
+  (fn [item-id {class-id :id} value]
     (prim/transact! c `[(classify-item
                           {:list-id  ~list-id,
                            :item-id  ~item-id,
