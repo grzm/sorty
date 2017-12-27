@@ -41,7 +41,10 @@
   Object
   (render [this]
     (let [{:keys [text-item]} (prim/props this)]
-      (dom/li nil (:text text-item)))))
+      (dom/li nil
+              (dom/p nil (:text text-item))
+              (when-let [member? (:member? text-item)]
+                (dom/p nil (str member?)))))))
 
 (def ui-text-item (prim/factory TextItem {:key-fn #(get-in % [:text-item :id])}))
 
@@ -67,15 +70,15 @@
                                [[events/KeyCodes.A :not-member
                                  (fn [e]
                                    (when (= (.-identifier e) (str :not-member))
-                                     (classify-fn text-item s-class)))]
+                                     (classify-fn text-item s-class :no)))]
                                 [events/KeyCodes.D :member
                                  (fn [e]
                                    (when (= (.-identifier e) (str :member))
-                                     (classify-fn text-item s-class)))]
+                                     (classify-fn text-item s-class :yes)))]
                                 [events/KeyCodes.S :skip
                                  (fn [e]
                                    (when (= (.-identifier e) (str :skip))
-                                     (classify-fn text-item s-class)))]])})))
+                                     (classify-fn text-item s-class :skip)))]])})))
 
   (componentWillUnmount [this]
     ;; why do I need this when-let?
@@ -97,7 +100,10 @@
           (dom/fieldset
             nil
             (dom/legend nil "Is this " (dom/strong nil (:name s-class)) "?")
-            (dom/div nil (:text text-item))
+            (dom/div nil
+                     (dom/p nil (:text text-item))
+                     (when-let [member? (:member? text-item)]
+                       (dom/p nil (str member?))))
             (dom/div #js {:className "form-check"}
                      (classify-button {:value   "yes"
                                        :onClick #(classify-fn text-item s-class :yes)} "yes")
@@ -119,17 +125,22 @@
                 active-index-ident [:queue/by-id list-id
                                     :queue/active-index]
                 active-index (get-in @state active-index-ident)]
-            (if (< active-index (dec item-count))
-              (swap! state update-in active-index-ident inc))))
+            (swap! state (fn [s]
+                           (cond-> s
+                                   (< active-index (dec item-count))
+                                   (update-in active-index-ident inc)
+
+                                   true
+                                   (assoc-in (conj item-ident :text-item :member?) value))))))
   (remote [env] true))
 
 (defn make-classify-fn [c list-id]
   (fn [{item-id :id} {class-id :id} value]
     (prim/transact! c `[(classify-item
-                          {:list-id ~list-id,
-                           :item-id ~item-id,
+                          {:list-id  ~list-id,
+                           :item-id  ~item-id,
                            :class-id ~class-id,
-                           :value ~value})])))
+                           :value    ~value})])))
 
 (defmutation move-index
   [{:keys [list-id direction]}]
@@ -161,8 +172,8 @@
   static prim/InitialAppState
   (initial-state
     [_ {:keys [queue/id]}]
-    {:queue/id    id
-     :queue/items []
+    {:queue/id           id
+     :queue/items        []
      :queue/active-index 0})
 
   Object
