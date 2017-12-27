@@ -27,7 +27,8 @@
                     {::http/join?           false
                      ::http/routes          #(route/expand-routes (deref #'routes/routes))
                      ::http/allowed-origins {:creds           true
-                                             :allowed-origins (constantly true)}})
+                                             :allowed-origins (constantly true)}
+                     ::http/secure-headers {:content-security-policy-settings {:object-src "none"}}})
                   http/default-interceptors
                   http/dev-interceptors)))))
 

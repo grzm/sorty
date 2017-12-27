@@ -1,16 +1,22 @@
 (ns com.grzm.sorty.server.system
   (:require
-   [com.grzm.sorty.server.config :as config]
-   [com.stuartsierra.component :as component]
-   [grzm.component.pedestal :as pedestal]
-   [io.pedestal.log :as log]
-   [reloaded.repl :as repl]))
+    [com.grzm.sorty.server.config :as config]
+    [com.stuartsierra.component :as component]
+    [com.grzm.component.pedestal :as pedestal]
+    [io.pedestal.log :as log]
+    [reloaded.repl :as repl]
+    [com.grzm.sorty.server.api :as api]
+    [com.grzm.sorty.server.app :as application]))
 
 (defn system
   [{:keys [pedestal] :as config}]
   (log/info :system "generating system map" :config config)
   (component/system-map
-    :pedestal (pedestal/pedestal (:config-fn pedestal))))
+    :api (component/using (api/api-handler) [:app])
+    :app (application/app)
+    :pedestal (component/using
+                (pedestal/pedestal (:config-fn pedestal))
+                [:api :app])))
 
 (defn start
   [config]

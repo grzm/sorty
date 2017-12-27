@@ -2,7 +2,8 @@
   (:require-macros
    [devcards.core :refer [defcard-doc]])
   (:require
-   [com.grzm.sorty.devcards.classifier]))
+   [com.grzm.sorty.devcards.classifier]
+   [com.grzm.sorty.devcards.queue-list]))
 
 (defcard-doc
   "
